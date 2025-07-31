@@ -1,8 +1,6 @@
 name: Daily NIFTY500 OHLCV Updater
 
 on:
-  schedule:
-    - cron: '0 20 * * *'   # Every day at 1:30 AM IST (20:00 UTC)
   workflow_dispatch:
 
 jobs:
