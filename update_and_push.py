@@ -40,7 +40,7 @@ def update_ohlcv(ticker):
     time.sleep(1)
     modified_ticker = ticker + ".NS"
     try:
-        df = yf.download(modified_ticker, period="5d", progress=False, auto_adjust=True, multi_level_index=False)
+        df = yf.download(modified_ticker, period="10y", progress=False, auto_adjust=True, multi_level_index=False)
         if df.empty:
             print(f"⚠️ No data for {ticker}")
             return
