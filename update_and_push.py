@@ -13,24 +13,36 @@ if not SUPABASE_URL or not SUPABASE_KEY:
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# === Step 1: NIFTY 500 Tickers ===
-def get_nifty500_tickers():
-    url = "https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv"
-    df = pd.read_csv(url)
-    tickers = df['SYMBOL'].dropna().unique().tolist()
-    return tickers
+ticker_list=pd.read_csv("EQUITY_L.csv")
 
-nifty_500_tickers = get_nifty500_tickers()
+# === Step 1: NIFTY 500 Tickers ==
 
-# === Step 2: Set Dates ===
-end_date = datetime.now().date()
-start_date = end_date - timedelta(days=1)
 
+
+# === Step 2: Update Metadata ===
+def update_metadata(tickers):
+    for ticker in tickers:
+        print(ticker)
+        modified_ticker=ticker+".NS"
+        try:
+            info = yf.Ticker(modified_ticker).info
+            metadata = {
+                "ticker": ticker,
+                "sector": info.get("sector", "Unknown"),
+                "industry": info.get("industry", "Unknown"),
+                "shares_outstanding": info.get("sharesOutstanding") or 0,
+            }
+            supabase.table("stock_metadata").upsert(metadata).execute()
+        except Exception as e:
+            print(f"[Metadata] {ticker} failed: {e}")
+
+# === Step 3: Update OHLCV ===
 # === Step 3: Fetch and Upload Data ===
-def fetch_and_upsert(ticker):
+def update_ohlcv(ticker):
+    time.sleep(1)
     modified_ticker = ticker + ".NS"
     try:
-        df = yf.download(modified_ticker, start=start_date, end=end_date, progress=False)
+        df = yf.download(modified_ticker,period="5d", progress=False,auto_adjust=True,multi_level_index=False)
         if df.empty:
             print(f"⚠️ No data for {ticker}")
             return
@@ -49,8 +61,8 @@ def fetch_and_upsert(ticker):
         print(f"✅ Upserted: {ticker}")
     except Exception as e:
         print(f"❌ Error with {ticker}: {e}")
-
-# === Step 4: Run ===
-print(f"📈 Updating OHLCV data for {len(nifty_500_tickers)} tickers from {start_date} to {end_date}")
-for ticker in nifty_500_tickers:
-    fetch_and_upsert(ticker)
+# === MAIN ===
+if __name__ == "__main__":
+    tickers = ticker_list['SYMBOL'].tolist()
+    update_metadata(tickers)
+    update_ohlcv(tickers)
