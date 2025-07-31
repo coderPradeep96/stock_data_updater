@@ -1,4 +1,4 @@
-name: Daily NIFTY500 OHLCV Updater
+name: Daily  OHLCV Updater
 
 on:
   workflow_dispatch:
