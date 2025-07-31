@@ -11,8 +11,8 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # === Step 1: NIFTY 500 Tickers ===
 def get_nifty500_tickers():
-    nifty500 = pd.read_csv("https://archives.nseindia.com/content/indices/ind_nifty500list.csv")
-    return [ticker + ".NS" for ticker in nifty500['Symbol'].tolist()]
+    nifty500 = pd.read_csv(https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv)
+    return nifty500['SYMBOL'].tolist()]
 
 nifty_500_tickers = get_nifty500_tickers()
 
@@ -22,8 +22,9 @@ start_date = end_date - timedelta(days=1)
 
 # === Step 3: Fetch and Upload Data ===
 def fetch_and_upsert(ticker):
+    modified_ticker=ticker + ".NS"
     try:
-        df = yf.download(ticker, start=start_date, end=end_date)
+        df = yf.download(modified_ticker, start=start_date, end=end_date)
         if df.empty:
             print(f"No data for {ticker}")
             return
