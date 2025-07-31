@@ -1,9 +1,10 @@
 name: Daily OHLCV Updater
 
 on:
-  workflow_dispatch:  # Manual trigger option
+  workflow_dispatch:     # manual trigger option
   schedule:
-    - cron: '30 17 * * *'  # Every day at 11:00 PM IST
+    - cron: '40 17 * * *'  # Runs daily at 11:10 PM IST
+
 
 jobs:
   update-data:
