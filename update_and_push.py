@@ -16,13 +16,18 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # === Step 1: Load Ticker List ===
 ticker_list = pd.read_csv("EQUITY_L.csv")
-tickers = ticker_list['SYMBOL'].dropna().unique().tolist()
+
+
+
+# === Step 1: NIFTY 500 Tickers ==
+
+
 
 # === Step 2: Update Metadata ===
 def update_metadata(tickers):
     for ticker in tickers:
-        print(f"Updating metadata: {ticker}")
-        modified_ticker = ticker + ".NS"
+        print(ticker)
+        modified_ticker=ticker+".NS"
         try:
             info = yf.Ticker(modified_ticker).info
             metadata = {
@@ -35,12 +40,14 @@ def update_metadata(tickers):
         except Exception as e:
             print(f"[Metadata] {ticker} failed: {e}")
 
+# === Step 3: Update OHLCV ===
+# === Step 3: Fetch and Upload Data ===
 # === Step 3: Update OHLCV with Batch Upload ===
 def update_ohlcv(ticker, batch_size=100):
     time.sleep(1)
     modified_ticker = ticker + ".NS"
     try:
-        df = yf.download(modified_ticker, period="10y", progress=False, auto_adjust=True)
+        df = yf.download(modified_ticker, period="2y", progress=False, auto_adjust=True)
         if df.empty:
             print(f"⚠️ No data for {ticker}")
             return
@@ -48,13 +55,13 @@ def update_ohlcv(ticker, batch_size=100):
         rows = []
         for i in range(len(df)):
             rows.append({
-                "date": df.index[i].strftime("%Y-%m-%d"),
                 "ticker": ticker,
-                "open": float(df["Open"].iloc[i]),
-                "high": float(df["High"].iloc[i]),
-                "low": float(df["Low"].iloc[i]),
-                "close": float(df["Close"].iloc[i]),
-                "volume": int(df["Volume"].iloc[i])
+                "date": df.index[i].strftime("%Y-%m-%d"),  # Fix Timestamp issue
+                "open": float(df["Open"].iloc[i].item()),  # Fix FutureWarning
+                "high": float(df["High"].iloc[i].item()),
+                "low": float(df["Low"].iloc[i].item()),
+                "close": float(df["Close"].iloc[i].item()),
+                "volume": int(df["Volume"].iloc[i].item())
             })
 
         for i in range(0, len(rows), batch_size):
@@ -67,6 +74,9 @@ def update_ohlcv(ticker, batch_size=100):
 
 # === MAIN ===
 if __name__ == "__main__":
+    tickers = ticker_list['Symbol'].tolist()
     update_metadata(tickers)
+    count=0
     for ticker in tickers:
+        count=count+1
         update_ohlcv(ticker)
