@@ -47,7 +47,7 @@ def update_ohlcv(ticker, batch_size=100):
     time.sleep(1)
     modified_ticker = ticker + ".NS"
     try:
-        df = yf.download(modified_ticker, period="2y", progress=False, auto_adjust=True)
+        df = yf.download(modified_ticker, period="1y", progress=False, auto_adjust=True)
         if df.empty:
             print(f"⚠️ No data for {ticker}")
             return
@@ -74,7 +74,7 @@ def update_ohlcv(ticker, batch_size=100):
 
 # === MAIN ===
 if __name__ == "__main__":
-    tickers = ticker_list['Symbol'].tolist()
+    tickers = ticker_list['SYMBOL'].tolist()
     update_metadata(tickers)
     count=0
     for ticker in tickers:
